@@ -1,0 +1,408 @@
+#lang racket
+(require racket/gui)
+(require (planet clements/rsound))
+(require (lib "graphics.ss" "graphics"))
+(open-graphics)
+(define colour (make-rgb 0.001 0.296 0.166))
+(define u 0)
+(define h 0)
+(define v 0)
+(define x2 0)
+(define y2 0)
+
+
+
+(define play-scrabble (open-viewport "play" 400 400))
+(play (rs-read "back-music.wav"))
+(define (start-play)
+
+(define (filplayer1 x y s h b)
+  (begin
+    
+      ((draw-pixmap play-scrabble) s (make-posn x y))
+      ((draw-rectangle play-scrabble) (make-posn x y) h b "black")))
+
+(filplayer1 0 0 "scrabb.PNG" 400 400)
+(filplayer1 13 315 "play.PNG" 140 70)
+(if (equal? (left-mouse-click? (get-mouse-click play-scrabble)) #f)
+                (start-play)
+                (begin
+                  (stop)
+                    (set! x2 (posn-x (query-mouse-posn play-scrabble)))
+                    (set! y2 (posn-y (query-mouse-posn play-scrabble)))
+                    ;(sleep 2)
+                    ;(close-viewport play)
+                     (cond ((and (>= x2 13) (<= x2 273) (>= y2 315) (<= y2 385)) (begin (close-viewport play-scrabble) 
+                           
+                     
+                     
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;port for selection of players
+(define select-players
+   
+  (open-viewport "select players" 400 400))
+
+(for ([h (in-range 50 360 300)])
+  ((draw-line select-players) (make-posn h 50) (make-posn h 100) "black"))
+  (for ([v (in-range 50 110 50)])
+  ((draw-line select-players) (make-posn 50 v) (make-posn 350 v) "black"))
+
+(for ([h (in-range 150 260 100)])
+  ((draw-line select-players) (make-posn h 150) (make-posn h 200) "black"))
+  (for ([v (in-range 150 210 50)])
+  ((draw-line select-players) (make-posn 150 v) (make-posn 250 v) "black"))
+
+(for ([h (in-range 150 260 100)])
+  ((draw-line select-players) (make-posn h 230) (make-posn h 280) "black"))
+  (for ([v (in-range 230 290 50)])
+  ((draw-line select-players) (make-posn 150 v) (make-posn 250 v) "black"))
+
+(for ([h (in-range 150 260 100)])
+  ((draw-line select-players) (make-posn h 310) (make-posn h 360) "black"))
+  (for ([v (in-range 310 370 50)])
+  ((draw-line select-players) (make-posn 150 v) (make-posn 250 v) "black"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;filing the port of selection-of-players
+
+(define (filplayer x y s h b)
+  (begin
+      ((draw-pixmap select-players) s (make-posn x y))
+      ((draw-rectangle select-players) (make-posn x y) h b "black")))
+(filplayer 0 0 "background.PNG" 400 400)
+(filplayer 50 50 "select-players.PNG" 300 50)
+
+(filplayer 150 150 "2.PNG" 100 50)
+(filplayer 150 230 "3.PNG" 100 50)
+(filplayer 150 310 "4.PNG" 100 50)
+
+ 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;starting game and opening viewport with grid
+
+(define (start-game)
+(define no-of-players 0)
+    (if (equal? (left-mouse-click? (get-mouse-click select-players)) #f)
+                (start-game)
+                (begin
+                    (set! x2 (posn-x (query-mouse-posn select-players)))
+                    (set! y2 (posn-y (query-mouse-posn select-players)))
+                    (sleep 1)
+                    (close-viewport select-players)
+                    (cond ((and (>= x2 150) (<= x2 250) (>= y2 150) (<= y2 200)) (set! no-of-players 2))
+                          ((and (>= x2 150) (<= x2 250) (>= y2 230) (<= y2 280)) (set! no-of-players 3))
+                          ((and (>= x2 150) (<= x2 250) (>= y2 310) (<= y2 360)) (set! no-of-players 4)))
+                     ))
+(define z (open-viewport "WORD SCRABBLE" 480 480))
+(define p (open-pixmap "WORD SCRABBLE" 550 550))
+                     
+(for ([v (in-range 11 461 30)])
+     (for ([h (in-range 11 461 30)])
+     ((draw-solid-rectangle z) (make-posn h v) 29 29 colour)))
+    
+(for ([h (in-range 10 470 30)])
+     ((draw-line z) (make-posn h 10) (make-posn h 460) "black"))
+
+(for ([v (in-range 10 470 30)])
+     ((draw-line z) (make-posn 10 v) (make-posn 460 v) "black"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;SETTING SCORES OF PLAYERS
+  
+(define (score-of- n)
+     (cond ((= n 1) score-of-first)
+           ((= n 2) score-of-second)
+           ((= n 3) score-of-third)
+           ((= n 4) score-of-fourth)))
+
+(define score-of-first 0)
+(define score-of-second 0)
+(define score-of-third 0)
+(define score-of-fourth 0)
+
+(define (score1 word count)
+  (if (equal? word #f) 0
+      (score (string->list word) count)))
+(define (score word count)
+(define (score-helper k lis)
+   (if (null? lis) #f
+       (if (equal? k (car lis)) #t
+           (score-helper k (remove (car lis) lis)))))
+  
+  (if (null? word) count
+  (if (score-helper (car word) (list #\e #\a #\i #\o #\n #\r #\t #\l #\s #\u))
+            (score (remove (car word) word) (+ count 1))
+  (if (score-helper (car word) (list #\d #\g))         
+            (score (remove (car word) word) (+ count 2))
+  (if (score-helper (car word) (list #\b #\c #\m #\p))         
+            (score (remove (car word) word) (+ count 3))
+  (if (score-helper (car word) (list #\f #\h #\v #\w #\y))         
+            (score (remove (car word) word) (+ count 4))
+  (if (score-helper (car word) (list #\k))         
+            (score (remove (car word) word) (+ count 5))
+  (if (score-helper (car word) (list #\j #\x))         
+            (score (remove (car word) word) (+ count 8))        
+            (score (remove (car word) word) (+ count 10))))))))))
+
+(define (helper l1 word)
+    (if (null? l1) word
+        (if (> (score1 (car l1) 0) (score1 word 0)) (helper (cdr l1) (car l1))
+            (helper (cdr l1) word))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define state 0)
+(define(find-space l in)
+  (define(find-space-h l)
+    (let ((c (read-char in)))
+      (cond ((eof-object? c) (set! state 0))
+            ((eq? c #\return) (set! state l))
+            ((eq? c #\newline) (set! state l))
+            ((eq? #\space c)
+                 (set! state l))
+            (else (find-space-h (+ l 1))))))
+  (find-space-h l))
+(define(find s)
+  (define ip (open-input-file "words.rkt"))
+  (define in (open-input-file "words.rkt"))
+  (define(find-h s)
+         (begin (find-space 1 in)
+            (let ((c (read-string state ip)))
+            (cond ((= state 0) (begin (close-input-port ip)
+                      (close-input-port in)
+                      #f))
+                  ((string=? (conc s) c)
+                      (begin (close-input-port ip)
+                      (close-input-port in)
+                      #t))
+                  (else (find-h s))))))
+  (find-h s))
+
+(define(conc s)
+  (list->string (append (string->list s) (list #\ ))))
+
+(define(conc1 s)
+  (list->string (cons #\return (cons #\newline (string->list s)))))
+
+  
+(define (fun l)
+  (if (null? l) #t
+  (if (equal? (car l) #f) #f (fun (remove (car l) l)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CHECKING WORDS
+(define l1 '())
+(define l '())
+(define word1 #f)
+(define word2 #f)
+(define (check-word x2 y2)
+  (let ((x (+ 1 (truncate (/ (- x2 10) 30))))
+        (y (+ 1 (truncate (/ (- y2 10) 30)))))
+  (loop (define last-no. y) : (<= last-no. 15) : (set! last-no. (+ last-no. 1)) : 
+  (loop (define initial 1) : (<= initial y) : (set! initial (+ initial 1)) :
+  (loop (define first initial) : (<= first last-no.) :
+        (set! first (+ first 1)) : (set! l (cons (get-board x first) l)))
+  (cond ((fun l)
+  (cond ((eq? (find (list->string (reverse l))) #t) (begin (set! word1 (list->string (reverse l))) (set!  l1 (cons word1 l1))))))) (set! l '())))
+    (if (null? l1) (set! word1 #f) (begin (set! word1 (helper (cdr l1) (car l1)))
+                                          (set! l1 '())))
+  (loop (define last-term x) : (<= last-term 15) : (set! last-term (+ last-term 1)) : 
+  (loop (define initial 1) : (<= initial x) : (set! initial (+ initial 1)) :
+  (loop (define first initial) : (<= first last-term) :
+        (set! first (+ first 1)) : (set! l (cons (get-board first y) l)))
+  (cond ((fun l)
+  (cond ((eq? (find (list->string (reverse l))) #t) (begin (set! word2 (list->string (reverse l))) (set! l1 (cons word2 l1))))))) (set! l '())))
+  (if (null? l1) (set! word2 #f) (begin (set! word2 (helper (cdr l1) (car l1)))
+                                          (set! l1 '())))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;SETTING ALPHABETS ON BOARD
+  
+(define (filname x y s)
+   (begin
+      ((draw-pixmap z) s (make-posn x y))
+      ((draw-rectangle z) (make-posn x y)
+      30 30 "black")))
+  
+(define (filalpha x y v)
+  (cond
+  ((equal? v #\a) (filname (+ (* (- x 1) 30) 10)
+                (+ (* (- y 1) 30) 10) "CaptureA.PNG"))
+  ((equal? v #\b) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureB.PNG"))
+  ((equal? v #\c) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureC.PNG"))
+  ((equal? v #\d) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureD.PNG"))
+  ((equal? v #\e) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureE.PNG"))
+  ((equal? v #\f) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureF.PNG"))
+  ((equal? v #\g) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureG.PNG"))
+  ((equal? v #\h) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureH.PNG"))
+  ((equal? v #\i) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureI.PNG"))
+  ((equal? v #\j) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureJ.PNG"))
+  ((equal? v #\k) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureK.PNG"))
+  ((equal? v #\l) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureL.PNG"))
+  ((equal? v #\m) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureM.PNG"))
+  ((equal? v #\n) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureN.PNG"))
+  ((equal? v #\o) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureO.PNG"))
+  ((equal? v #\p) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureP.PNG"))
+  ((equal? v #\q) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureQ.PNG"))
+  ((equal? v #\r) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureR.PNG"))
+  ((equal? v #\s) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureS.PNG"))
+  ((equal? v #\t) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureT.PNG"))
+  ((equal? v #\u) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureU.PNG"))
+  ((equal? v #\v) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureV.PNG"))
+  ((equal? v #\w) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureW.PNG"))
+  ((equal? v #\x) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureX.PNG"))
+  ((equal? v #\y) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureY.PNG"))
+  ((equal? v #\z) (filname (+ (* (- x 1) 30) 10)
+                           (+ (* (- y 1) 30) 10) "CaptureZ.PNG"))
+  ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (game x2 y2 c total)
+   (define x (+ 1 (truncate (/ (- x2 10) 30))))
+   (define y (+ 1 (truncate (/ (- y2 10) 30))))
+        (cond
+          ((or (or (> x2 460)
+                   (< x2 10))
+               (or (> y2 460)
+                   (< y2 10)))
+           (begin (msj "not allowed") (player-p c total)))
+         ((not (equal? (get-board x y) #f))
+               (begin (msj "not allowed") (player-p c total)))
+         (else (get-the-mouse-pos x y))))
+        
+
+(define (get-the-mouse-pos x y)
+    (define key-val (key-value (get-key-press z))) 
+    (define key-val2 (key-value (get-key-press z)))
+    (begin (filalpha x y key-val) (modify-board x y key-val)))
+
+
+(define (player-p n total)
+  (if (equal? (left-mouse-click? (get-mouse-click z)) #f)
+              (lets-play total)
+      (begin 
+          (set! x2 (posn-x (query-mouse-posn z)))
+          (set! y2 (posn-y (query-mouse-posn z))) 
+          (game x2 y2 n total)))
+  (check-word x2 y2)
+  (cond ((not (and (equal? word1 #f) (equal? word2 #f)))
+          (begin (cond ((= n 1) (set! score-of-first
+                                (+ score-of-first (score1 word1 0) (score1 word2 0))))
+                       ((= n 2) (set! score-of-second
+                                (+ score-of-second (score1 word1 0) (score1 word2 0))))
+                       ((= n 3) (set! score-of-third
+                                (+ score-of-third (score1 word1 0) (score1 word2 0))))
+                       ((= n 4) (set! score-of-fourth
+                                (+ score-of-fourth (score1 word1 0) (score1 word2 0)))))
+                  (set! word1 #f)
+                  (set! word2 #f)
+                  (msj-score total (number->string (score-of- 1))
+                                   (number->string (score-of- 2))
+                                   (number->string (score-of- 3))
+                                   (number->string (score-of- 4)))))))
+  
+(define (lets-play-helper total n)
+        (cond ((> n total) (lets-play total))
+              (else (begin (player-p n total)
+                           (lets-play-helper total (+ n 1))))))
+  
+(define (lets-play total)
+        (lets-play-helper total 1))
+
+(lets-play no-of-players))
+  (start-game)))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-syntax loop
+  (syntax-rules (:)
+    [(loop init : condition : step : statements ...)
+     (begin
+       init
+       (define (iter)
+         (cond [condition (begin statements ... step (iter))]))
+       (iter))]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;BOARD 
+
+(define (make-2d-vector r c init)
+  (build-vector r       
+	(lambda (x) (make-vector c #f))))
+
+(define (2d-vector-ref vec r c)
+  (vector-ref (vector-ref vec r) c))
+
+(define (2d-vector-set! vec r c val)
+  (let ((v (vector-ref vec r)))
+    (begin
+      (vector-set! v c val)
+      (vector-set! vec r v))))
+(define vec (make-2d-vector 15 15 #f))
+
+(define (modify-board n m val)
+  (2d-vector-set! vec (- n 1) (- m 1) val))
+
+(define (get-board n m)
+  (2d-vector-ref vec (- n 1) (- m 1)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ALERT MESSAGES
+
+(define(msj text)
+  (define m (open-viewport "alert" 300 50))
+    ((draw-string m) (make-posn 50 20) text "red")
+   (sleep 2)
+  (close-viewport m))
+
+(define (msj-score total score1 score2 score3 score4)
+  (define m (open-viewport "score" 300 150))
+  (cond ((= total 2) (begin ((draw-string m) (make-posn 50 30) "Player1" "orange")
+         ((draw-string m) (make-posn 150 30) score1 "red")
+         ((draw-string m) (make-posn 50 60) "Player2" "orange")
+         ((draw-string m) (make-posn 150 60) score2 "red")))
+        ((= total 3) (begin ((draw-string m) (make-posn 50 30) "Player1" "orange")
+         ((draw-string m) (make-posn 150 30) score1 "red")
+         ((draw-string m) (make-posn 50 60) "Player2" "orange")
+         ((draw-string m) (make-posn 150 60) score2 "red")
+         ((draw-string m) (make-posn 50 90) "Player3" "orange")
+         ((draw-string m) (make-posn 150 90) score3 "red")))
+        ((= total 4) (begin ((draw-string m) (make-posn 50 30) "Player1" "orange")
+         ((draw-string m) (make-posn 150 30) score1 "red")
+         ((draw-string m) (make-posn 50 60) "Player2" "orange")
+         ((draw-string m) (make-posn 150 60) score2 "red")
+         ((draw-string m) (make-posn 50 90) "Player3" "orange")
+         ((draw-string m) (make-posn 150 90) score3 "red")
+         ((draw-string m) (make-posn 50 120) "Player4" "orange")
+         ((draw-string m) (make-posn 150 120) score4 "red"))))
+  (sleep 2)
+  (close-viewport m))
+
+(start-play)
+
+
